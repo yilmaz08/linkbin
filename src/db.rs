@@ -58,6 +58,15 @@ pub fn delete_link(conn: &Connection, link: &Link) -> Result<()> {
     return Ok(());
 }
 
+pub fn update_link(conn: &Connection, link: &mut Link, new_target: String) -> Result<()> {
+    link.target = new_target;
+    conn.execute(
+        "update links set target=?1 where id=?2",
+        params!(&link.target, link.id)
+    )?;
+    return Ok(());
+}
+
 // TABLES and STRUCTURE
 pub fn fix_tables(conn: &Connection) -> Result<()> {
     create_table_links(&conn)?;

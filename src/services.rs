@@ -1,4 +1,4 @@
-use actix_web::{get, post, delete, web, HttpResponse, Responder};
+use actix_web::{get, post, delete, patch, web, HttpResponse, Responder};
 
 use crate::{AppState, db};
 
@@ -47,6 +47,20 @@ async fn delete_link(params: web::Path<String>, data: web::Data<AppState>) -> im
         Ok(Some(link)) => {
             match db::delete_link(&data.conn, &link) {
                 Ok(_) => HttpResponse::Ok().body("Link successfully deleted!"),
+                Err(_) => HttpResponse::InternalServerError().body("Internal Server Error")
+            }
+        }
+        Ok(None) => HttpResponse::NotFound().body("Link not found!"),
+        Err(_) => HttpResponse::InternalServerError().body("Internal Server Error")
+    }
+}
+
+#[patch("/l/{name}")] // Update Link
+async fn update_link(params: web::Path<String>, data: web::Data<AppState>, body: web::Bytes) -> impl Responder {
+    match db::get_link_by_name(&data.conn, params.to_string()) {
+        Ok(Some(mut link)) => {
+            match db::update_link(&data.conn, &mut link, std::str::from_utf8(&body).unwrap().to_string()) {
+                Ok(_) => HttpResponse::Ok().body(format!("Link target changed to `{}`", link.target)),
                 Err(_) => HttpResponse::InternalServerError().body("Internal Server Error")
             }
         }

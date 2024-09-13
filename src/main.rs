@@ -27,6 +27,7 @@ async fn main() -> std::io::Result<()> {
             .service(services::get_link_plain)
             .service(services::add_link)
             .service(services::delete_link)
+            .service(services::update_link)
     })
     .bind(("0.0.0.0", port))?
     .run()
