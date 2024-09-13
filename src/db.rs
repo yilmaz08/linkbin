@@ -70,13 +70,30 @@ pub fn update_link(conn: &Connection, link: &mut Link, new_target: String) -> Re
 // TABLES and STRUCTURE
 pub fn fix_tables(conn: &Connection) -> Result<()> {
     create_table_links(&conn)?;
+    create_table_files(&conn)?;
+    return Ok(());
+}
+
+fn create_table_files(conn: &Connection) -> Result<()> {
+    match conn.execute("SELECT * FROM files;", ()) {
+        Ok(..) => {}
+        Err(_) => {
+            conn.execute(
+                "create table files (
+                    id integer primary key,
+                    name text not null unique,
+                    data blob not null
+                );",
+                ()
+            )?;
+        }
+    }
+
     return Ok(());
 }
 
 fn create_table_links(conn: &Connection) -> Result<()> {
-    let mut stmt = conn.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='links';")?;
-    let mut rows = stmt.query(())?;
-    match rows.next() {
+    match conn.prepare("SELECT * FROM links;") {
         Ok(..) => {}
         Err(_) => {
             conn.execute(
