@@ -28,6 +28,9 @@ async fn main() -> std::io::Result<()> {
             .service(services::add_link)
             .service(services::delete_link)
             .service(services::update_link)
+            .service(services::get_file)
+            .service(services::get_file_plain)
+            .service(services::add_file)
     })
     .bind(("0.0.0.0", port))?
     .run()
