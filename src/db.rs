@@ -117,6 +117,15 @@ pub fn get_file_data(conn: &Connection, file: &File) -> Result<Option<Vec<u8>>> 
     return Ok(None);
 }
 
+// DELETE FILE
+pub fn delete_file(conn: &Connection, file: &File) -> Result<()> {
+    conn.execute(
+        "delete from files where id=?1",
+        params!(file.id)
+    )?;
+    return Ok(());
+}
+
 // TABLES and STRUCTURE
 pub fn fix_tables(conn: &Connection) -> Result<()> {
     create_table_links(&conn)?;

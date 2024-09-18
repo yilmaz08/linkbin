@@ -104,3 +104,17 @@ async fn add_file(params: web::Path<String>, data: web::Data<AppState>, body: we
         Err(_) => HttpResponse::InternalServerError().body("Internal Server Error")
     }
 }
+
+#[delete("/f/{name}")]
+async fn delete_file(params: web::Path<String>, data: web::Data<AppState>) -> impl Responder {
+    match db::get_file_by_name(&data.conn, params.to_string()) {
+        Ok(Some(file)) => {
+            match db::delete_file(&data.conn, &file) {
+                Ok(_) => HttpResponse::Ok().body("File successfully deleted!"),
+                Err(_) => HttpResponse::InternalServerError().body("Internal Server Error")
+            }
+        }
+        Ok(None) => HttpResponse::NotFound().body("File not found!"),
+        Err(_) => HttpResponse::InternalServerError().body("Internal Server Error")
+    }
+}

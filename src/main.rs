@@ -31,6 +31,7 @@ async fn main() -> std::io::Result<()> {
             .service(services::get_file)
             .service(services::get_file_plain)
             .service(services::add_file)
+            .service(services::delete_file)
     })
     .bind(("0.0.0.0", port))?
     .run()
