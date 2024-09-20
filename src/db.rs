@@ -126,6 +126,15 @@ pub fn delete_file(conn: &Connection, file: &File) -> Result<()> {
     return Ok(());
 }
 
+// UPDATE FILE
+pub fn update_file(conn: &Connection, file: &File, data: Vec<u8>) -> Result<()> {
+    conn.execute(
+        "update files set data=?1 where id=?2",
+        params!(data, file.id)
+    )?;
+    return Ok(());
+}
+
 // TABLES and STRUCTURE
 pub fn fix_tables(conn: &Connection) -> Result<()> {
     create_table_links(&conn)?;
