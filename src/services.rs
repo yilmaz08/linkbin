@@ -68,3 +68,67 @@ async fn update_link(params: web::Path<String>, data: web::Data<AppState>, body:
         Err(_) => HttpResponse::InternalServerError().body("Internal Server Error")
     }
 }
+
+#[get("/f/{name}")] // Get File
+async fn get_file() -> impl Responder {
+    return HttpResponse::NotImplemented().body("This feature is not implemented yet!");
+}
+
+#[get("/fp/{name}")] // Get File Plain (no HTML)
+async fn get_file_plain(params: web::Path<String>, data: web::Data<AppState>) -> impl Responder {
+    match db::get_file_by_name(&data.conn, params.to_string()) {
+        Ok(Some(file)) => {
+            match db::get_file_data(&data.conn, &file) {
+                Ok(Some(content)) => HttpResponse::Ok()
+                                .body(content),
+                Ok(None) => HttpResponse::NotFound()
+                                .body("File not found!"),
+                Err(_) => HttpResponse::InternalServerError().body("Internal Server Error")
+            }
+        }
+        Ok(None) => HttpResponse::NotFound().body("File not found!"),
+        Err(_) => HttpResponse::InternalServerError().body("Internal Server Error")
+    }
+}
+
+#[post("/f/{name}")] // Create File
+async fn add_file(params: web::Path<String>, data: web::Data<AppState>, body: web::Bytes) -> impl Responder {
+    match db::get_file_by_name(&data.conn, params.to_string()) {
+        Ok(None) => {
+            match db::create_file(&data.conn, Some(params.to_string()), body.to_vec()) {
+                Ok(file) => HttpResponse::Ok().body(format!("File saved as `{}`", file.name)),
+                Err(_) => HttpResponse::InternalServerError().body("Internal Server Error")
+            }
+        }
+        Ok(Some(_)) => HttpResponse::Conflict().body("File already exists!"),
+        Err(_) => HttpResponse::InternalServerError().body("Internal Server Error")
+    }
+}
+
+#[delete("/f/{name}")] // Delete File
+async fn delete_file(params: web::Path<String>, data: web::Data<AppState>) -> impl Responder {
+    match db::get_file_by_name(&data.conn, params.to_string()) {
+        Ok(Some(file)) => {
+            match db::delete_file(&data.conn, &file) {
+                Ok(_) => HttpResponse::Ok().body("File successfully deleted!"),
+                Err(_) => HttpResponse::InternalServerError().body("Internal Server Error")
+            }
+        }
+        Ok(None) => HttpResponse::NotFound().body("File not found!"),
+        Err(_) => HttpResponse::InternalServerError().body("Internal Server Error")
+    }
+}
+
+#[patch("/f/{name}")] // Update File
+async fn update_file(params: web::Path<String>, data: web::Data<AppState>, body: web::Bytes) -> impl Responder {
+    match db::get_file_by_name(&data.conn, params.to_string()) {
+        Ok(Some(file)) => {
+            match db::update_file(&data.conn, &file, body.to_vec()) {
+                Ok(_) => HttpResponse::Ok().body("File is successfully updated!"),
+                Err(_) => HttpResponse::InternalServerError().body("Internal Server Error")
+            }
+        }
+        Ok(None) => HttpResponse::NotFound().body("File not found!"),
+        Err(_) => HttpResponse::InternalServerError().body("Internal Server Error")
+    }
+}
